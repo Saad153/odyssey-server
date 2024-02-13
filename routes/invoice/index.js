@@ -229,6 +229,52 @@ routes.get("/getInvoiceByNo", async(req, res) => {
     }
 });
 
+routes.get("/getInvoiceById", async(req, res) => {
+  try {
+      const attr = [
+        'name', 'address1', 'address1', 'person1', 'mobile1',
+        'person2', 'mobile2', 'telephone1', 'telephone2', 'infoMail'
+      ];
+      const resultOne = await Invoice.findOne({
+        where:{id:{ [Op.eq]: req.headers.invoiceid }},
+        include:[
+          { model:Charge_Head },
+          {
+            model:SE_Job,
+            attributes:[
+              'jobNo', 'jobDate', 'shipDate', 'pol', 'pod', 'fd', 'vol', 'weight', 'pcs', 'flightNo', 'cwtClient', 'cwtLine', 'departureDate'
+            ],
+            //attributes:['id'],
+            include:[
+              { model:SE_Equipments , attributes:['qty', 'size'] },
+              { 
+                model:Bl , attributes:['mbl', 'hbl'],
+                include:[{model:Container_Info, attributes:['no']}]
+              },
+              { model:Voyage , attributes:['voyage', 'importArrivalDate', 'exportSailDate'] },
+              { model:Clients, attributes:attr },
+              { model:Clients, as:'consignee', attributes:attr },
+              { model:Clients, as:'shipper', attributes:attr },
+              { model:Vendors, as:'shipping_line', attributes:attr },
+              { model:Employees, as:'sales_representator', attributes:['name'] },
+              { model:Vessel, as:'vessel', attributes:['carrier', 'name'] },
+              { model:Vendors, as:'air_line', attributes:['name'] },
+              //{ model:Voyage },
+            ]
+          },
+        ],
+        order: [
+          [{ model: Charge_Head }, 'id', 'ASC'],
+        ]
+      }).catch((x)=>console.log(x))
+      res.json({status:'success', result:{ resultOne }});
+    }
+    catch (error) {
+      res.json({status:'error', result:error});
+      console.log(error)
+    }
+});
+
 routes.get("/getAllInoivcesByPartyId", async(req, res) => {
 
   try {
@@ -330,34 +376,6 @@ routes.get("/getAllInoivcesByPartyId", async(req, res) => {
     }
 
     res.json({ status:'success', result:result, account:partyAccount });
-  } catch (error) {
-
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/invoiceTestingOnly", async(req, res) => {
-  try {
-    //SE_Job
-    const result = await Invoice.findAll({
-      limit:1,
-      where:{
-        party_Id:null,
-        payType:'Recievable'
-      }
-    });
-    result.forEach(async(x)=>{
-      console.log(x.party_Name);
-      let clientId = await Clients.findOne({
-        where:{name:x.party_Name},
-        attributes:['id']
-      });
-      if(clientId.id){
-        console.log(clientId.id);
-        await Invoice.update({party_Id:clientId.id},{where:{id:x.id}})
-      }
-    })
-    res.json({ status:'successBaby', result });
   } catch (error) {
 
     res.json({status:'error', result:error});
@@ -766,7 +784,7 @@ routes.get("/jobBalancing", async (req, res) => {
 
     const result = await Invoice.findAll({
       where:invoiceObj,
-      attributes:['invoice_No', 'payType', 'currency', 'ex_rate', 'roundOff', 'total', 'paid', 'recieved', 'createdAt', 'party_Name'],
+      attributes:['id','invoice_No', 'payType', 'currency', 'ex_rate', 'roundOff', 'total', 'paid', 'recieved', 'createdAt', 'party_Name'],
       include:[includeObj],
       order: [[ 'createdAt', 'ASC' ]],
     });
