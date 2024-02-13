@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         operation:                { type:DataTypes.STRING  },
         companyId:                { type:DataTypes.STRING  },
         type:                     { type:DataTypes.STRING  },
+        indexNo:                  { type:DataTypes.STRING  },
     })
     return Delivery_Order;
 }
