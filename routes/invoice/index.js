@@ -278,7 +278,6 @@ routes.get("/getInvoiceById", async(req, res) => {
 });
 
 routes.get("/getAllInoivcesByPartyId", async(req, res) => {
-
   try {
     let obj = {
       approved:"1",
