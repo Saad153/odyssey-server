@@ -1,5 +1,5 @@
 const { Charge_Head, Invoice, Invoice_Losses, Invoice_Transactions } = require("../../functions/Associations/incoiceAssociations");
-const { SE_Job, SE_Equipments, Bl, Container_Info } = require("../../functions/Associations/jobAssociations/seaExport");
+const { SE_Job, SE_Equipments, Bl, Container_Info ,Commodity} = require("../../functions/Associations/jobAssociations/seaExport");
 const { Child_Account, Parent_Account } = require("../../functions/Associations/accountAssociations");
 const { Access_Levels, Employees } = require("../../functions/Associations/employeeAssociations");
 const { Vouchers, Voucher_Heads } = require("../../functions/Associations/voucherAssociations");
@@ -213,6 +213,7 @@ routes.get("/getInvoiceByNo", async(req, res) => {
               { model:Employees, as:'sales_representator', attributes:['name'] },
               { model:Vessel, as:'vessel', attributes:['carrier', 'name'] },
               { model:Vendors, as:'air_line', attributes:['name'] },
+              { model:Commodity, as:'commodity', attributes:['name'] },
               //{ model:Voyage },
             ]
           },

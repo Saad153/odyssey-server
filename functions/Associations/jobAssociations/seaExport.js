@@ -130,5 +130,5 @@ SE_Job.belongsTo(Vessel,    {as:'vessel'             });
 
 module.exports = { 
     Loading_Program, Job_notes, Delivery_Order, Item_Details, SE_Equipments, SE_Job, Bl,
-    Container_Info, Stamps, Dimensions, Manifest, Manifest_Jobs
+    Container_Info, Stamps, Dimensions, Manifest, Manifest_Jobs, Commodity
 }
