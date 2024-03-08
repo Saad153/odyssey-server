@@ -20,6 +20,7 @@ routes.get('/getAllNotifications', async(req, res) => {
     try {
         const result =  await Notifications.findAll({
             include: [{model: Employees, as : "createdBy", attributes : ['name']}],
+            limit:20,
             order:[["createdAt", "DESC"]],
         })
         res.json({ status: "success", result:result})
@@ -32,7 +33,6 @@ routes.get('/getAllNotifications', async(req, res) => {
  
 
 routes.post('/updateNotification', async(req, res) => {
-    console.log("updte")
     try {
      const result =  await Notifications.update({opened : req.body.data.opened}, {where : {subType : req.body.data.subType}})
      res.json({ status: "success", result:result})
