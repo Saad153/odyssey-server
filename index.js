@@ -37,9 +37,8 @@ const { Clients, Client_Associations } = require('./functions/Associations/clien
 const { Vouchers, Voucher_Heads } = require('./functions/Associations/voucherAssociations');
 const { Invoice_Transactions } = require('./functions/Associations/incoiceAssociations');
 const { Notifications } = require('./functions/Associations/NotificationAssociation');
-const { AssignTask } = require('./functions/Associations/taskAssociation');
+const { AssignTask, Tasks, Sub_Tasks, Task_Logs } = require('./functions/Associations/taskAssociation');
 const { Voyage } = require('./functions/Associations/vesselAssociations');
-const { Non_Gl_Parties } = require('./models');
 
 app.use(morgan('tiny'));
 app.use(cors()); 
