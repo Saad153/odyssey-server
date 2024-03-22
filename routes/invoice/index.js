@@ -291,7 +291,20 @@ routes.get("/getAllInoivcesByPartyId", async(req, res) => {
     }
     let transactionObj = [
       { 
-        model:SE_Job,  attributes:['id', 'jobNo', 'subType'], 
+        model:SE_Job,  
+        attributes:['id', 'jobNo', 'subType'],
+        include:[
+          {
+            model:Bl,
+            attributes:['hbl', 'mbl'],
+            include:[
+              {
+                model:Container_Info,
+                attributes:['no']
+              }
+            ]
+          },
+        ]
         //where:{companyId:req.headers.companyid} 
       },
       //{ model:Charge_Head, attributes:['net_amount', 'local_amount', 'currency', 'ex_rate'] }
@@ -310,7 +323,7 @@ routes.get("/getAllInoivcesByPartyId", async(req, res) => {
     }
     const result = await Invoice.findAll({
       where:obj,
-      attributes:['id','invoice_No', 'invoice_Id', 'recieved', 'paid', 'status', 'total', 'currency', 'roundOff', 'party_Id', 'operation', 'ex_rate'],
+      attributes:['id','invoice_No', 'invoice_Id', 'payType', 'recieved', 'paid', 'status', 'total', 'currency', 'roundOff', 'party_Id', 'operation', 'ex_rate'],
       order:[['invoice_Id', 'ASC']],
       include:transactionObj
     });
