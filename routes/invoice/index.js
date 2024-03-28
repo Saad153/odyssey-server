@@ -7,7 +7,7 @@ const { Vendor_Associations } = require("../../functions/Associations/vendorAsso
 const { Client_Associations } = require("../../functions/Associations/clientAssociation");
 const { Vendors } = require("../../functions/Associations/vendorAssociations");
 const { Voyage } = require('../../functions/Associations/vesselAssociations');
-const { Clients }=require("../../functions/Associations/clientAssociation");
+const { Clients } = require("../../functions/Associations/clientAssociation");
 const { Accounts, Vessel, Transaction } = require("../../models");
 const routes = require('express').Router();
 const Sequelize = require('sequelize');
@@ -432,7 +432,14 @@ routes.get("/getAllOldInoivcesByPartyId", async(req, res) => {
             {
               model:Child_Account,
               include:[
-                {model:Parent_Account, where:{ title:req.headers.pay=="Recievable"?"ACCOUNT RECEIVABLE":"ACCOUNT PAYABLE" }}
+                { 
+                  model:Parent_Account,
+                  where:{ 
+                    title:req.headers.pay=="Recievable"?
+                      "ACCOUNT RECEIVABLE":
+                      "ACCOUNT PAYABLE" 
+                  }
+                }
               ]
             }
           ]
@@ -465,7 +472,7 @@ routes.get("/getAllOldInoivcesByPartyId", async(req, res) => {
         });
       }
     }
-    res.json({ status:'success', result:result, account:partyAccount });
+      res.json({ status:'success', result:result, account:partyAccount });
     }
     catch (error) {
       res.json({status:'error', result:error});

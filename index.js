@@ -8,6 +8,7 @@ const db = require("./models");
 // All Routes throughout the project
 
 const miscProfitLossRoutes = require('./routes/misc/profitLoss');
+const misctrialBalanceRoutes = require('./routes/misc/trialBalance');
 const homeOperationsRoutes = require('./routes/home/operations');
 const homeDashboardRoutes = require('./routes/home/dashboard');
 const notificationRoutes = require('./routes/notifications');
@@ -51,7 +52,7 @@ db.sequelize.sync();
 //app.get("/getUser", verify, (req, res) => {res.json({isLoggedIn:true,username:req.body.username})});
 app.get("/", (req, res) => { res.json('Welcome To Odyssey Server in Hail Dot Tech') });
 app.use("/home", homeAccountRoutes, homeOperationsRoutes, homeDashboardRoutes);
-app.use("/misc", miscPartiesRoutes, miscProfitLossRoutes);
+app.use("/misc", miscPartiesRoutes, miscProfitLossRoutes, misctrialBalanceRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/employeeRoutes", employeeRoutes);
 app.use("/nonGlParties", nonGlParties);
