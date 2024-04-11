@@ -49,7 +49,7 @@ app.use(bodyParser.json({limit: '100mb', extended: true}));
 app.use(express.json());
 db.sequelize.sync();
 
-//app.get("/getUser", verify, (req, res) => {res.json({isLoggedIn:true,username:req.body.username})});
+app.get("/getUser", verify, (req, res) => {res.json({isLoggedIn:true,username:req.body.username})});
 app.get("/", (req, res) => { res.json('Welcome To Odyssey Server in Hail Dot Tech') });
 app.use("/home", homeAccountRoutes, homeOperationsRoutes, homeDashboardRoutes);
 app.use("/misc", miscPartiesRoutes, miscProfitLossRoutes, misctrialBalanceRoutes);

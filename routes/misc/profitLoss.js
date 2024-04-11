@@ -1,6 +1,6 @@
 const { Child_Account, Parent_Account } = require("../../functions/Associations/accountAssociations");
 const { Invoice, Invoice_Losses, Invoice_Transactions } = require("../../functions/Associations/incoiceAssociations");
-const {Vouchers,Voucher_Heads}=require("../../functions/Associations/voucherAssociations");
+const { Vouchers, Voucher_Heads }=require("../../functions/Associations/voucherAssociations");
 const { SE_Job } = require("../../functions/Associations/jobAssociations/seaExport");
 const { Vendors } = require("../../functions/Associations/vendorAssociations");
 const { Clients }=require("../../functions/Associations/clientAssociation");
@@ -9,7 +9,7 @@ const routes=require('express').Router();
 const Sequelize=require('sequelize');
 const moment = require("moment");
 const url = 'profitLoss';
-const Op=Sequelize.Op;
+const Op = Sequelize.Op;
 
 routes.get(`/${url}/job`, async(req, res) => {
   try {
@@ -138,8 +138,6 @@ routes.get(`/${url}/full`, async(req, res) => {
 
 routes.get(`/${url}/test`, async(req, res) => {
   try {
-    console.log(req.headers.to);
-    console.log(req.headers.from);
 
     let dateObj = {
       createdAt: {
@@ -172,11 +170,47 @@ routes.get(`/${url}/test`, async(req, res) => {
 
 routes.get(`/${url}/search`, async(req, res) => {
   try {
-      const result = await Employees.findAll({where:{represent: {[Op.substring]: 'sr'} }, attributes:['id', 'name']});
-      res.json({status:'success', result:result});
+    const result = await Employees.findAll({where:{represent: {[Op.substring]: 'sr'} }, attributes:['id', 'name']});
+    res.json({status:'success', result:result});
   }
   catch (error) {
     res.json({status:'error', result:error});
+  }
+});
+
+routes.get(`/${url}/incomeStatement`, async(req, res) => {
+  console.log("over Here")
+  try {
+    const result = await Accounts.findAll({
+      where:{
+        id:[1, 2]
+      },
+      include:[{
+        model:Parent_Account,
+        attributes:['id'],
+        where:{CompanyId:req.headers.company},
+          include:[{
+            model:Child_Account,
+            attributes:['id', 'title'],
+            // order: [[{ model: Voucher_Heads }, 'createdAt', 'DESC']],
+            include:[{
+              model:Voucher_Heads,
+              // order: [['createdAt', 'ASC']],
+              attributes:['amount', 'defaultAmount', 'type', 'accountType', 'settlement', 'createdAt'],
+              where:{
+                createdAt: {
+                  [Op.gte]: moment(req.headers.from).toDate(),
+                  [Op.lte]: moment(req.headers.to).add(1, 'days').toDate(),
+                }
+              },
+            }]
+          }],
+      }]
+    })
+    res.json({status:'success', result:result});
+  }
+  catch (error) {
+    res.json({status: 'error', result: error});
   }
 });
 
