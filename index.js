@@ -31,6 +31,7 @@ const vesselRoutes = require('./routes/vessel');
 const manifest = require('./routes/manifest');
 const authRoutes = require('./routes/auth/');
 const ports = require("./routes/ports");
+const verify = require("./functions/tokenVerification");
 
 const { SE_Equipments, SE_Job, Container_Info, Bl, Stamps, Job_notes, Delivery_Order, Item_Details, Manifest, Manifest_Jobs } = require('./functions/Associations/jobAssociations/seaExport');
 const { Vendors, Vendor_Associations } = require('./functions/Associations/vendorAssociations');

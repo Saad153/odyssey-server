@@ -282,12 +282,13 @@ routes.get("/getAllInoivcesByPartyId", async(req, res) => {
     let obj = {
       approved:"1",
       party_Id:req.headers.id,
-      payType:req.headers.pay,
       companyId:req.headers.companyid
       //...chardHeadLogic(req.headers.invoicecurrency)
     }
     if(req.headers.party=="agent"){
       obj.currency = req.headers.invoicecurrency
+    } else {
+      obj.payType = req.headers.pay
     }
     let transactionObj = [
       { 
@@ -367,7 +368,7 @@ routes.get("/getAllInoivcesByPartyId", async(req, res) => {
             }
           ]
         })
-      }else {
+      } else {
         console.log("================Client HERE===================")
         partyAccount = await Client_Associations.findAll({
           where:{ 

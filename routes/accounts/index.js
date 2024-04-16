@@ -8,6 +8,7 @@ const { Vouchers, Voucher_Heads } = require("../../functions/Associations/vouche
 const { Client_Associations, Clients } = require('../../functions/Associations/clientAssociation');
 const { Vendor_Associations, Vendors } = require('../../functions/Associations/vendorAssociations');
 const { Child_Account, Parent_Account } = require("../../functions/Associations/accountAssociations");
+const { SE_Job, SE_Equipments, Bl, Container_Info } = require("../../functions/Associations/jobAssociations/seaExport");
 
 //Voucher Types
 // (For Jobs)
@@ -626,23 +627,23 @@ routes.get("/parentAccounts", async(req, res) => {
 });
 
 routes.post("/accountCreate", async(req, res) => {
-    let obj = req.body;
-    try { 
-      for (let i = 1; i <= 3; i++) {
-        let newObj = [];
-        await obj.forEach((x) => {
-          newObj.push({...x, CompanyId:i, editable:'0'});
-        })
-        await newObj.forEach(async(x) => {
-            const result = await Parent_Account.create(x)
-            if(x.childAccounts.length > 0) {
-              let tempAccounts = [];
-              await x.childAccounts.forEach(async(y) => {
-                await tempAccounts.push({...y, ParentAccountId:result.id});
-              })
-              await Child_Account.bulkCreate(tempAccounts).catch((z)=>console.log(z));
-            }
-        });
+  let obj = req.body;
+  try { 
+    for (let i = 1; i <= 3; i++) {
+      let newObj = [];
+      await obj.forEach((x) => {
+        newObj.push({...x, CompanyId:i, editable:'0'});
+      })
+      await newObj.forEach(async(x) => {
+        const result = await Parent_Account.create(x)
+        if(x.childAccounts.length > 0) {
+          let tempAccounts = [];
+          await x.childAccounts.forEach(async(y) => {
+            await tempAccounts.push({...y, ParentAccountId:result.id});
+          })
+          await Child_Account.bulkCreate(tempAccounts).catch((z)=>console.log(z));
+        }
+      });
     }
     await res.json({status:'success'});
   }
@@ -794,10 +795,26 @@ routes.post("/deleteAll", async(req, res) => {
   }
 });
 
+routes.post("/deleteJobs", async(req, res) => {
+  try {
+    await SE_Job.destroy({where:{}})
+    await SE_Equipments.destroy({where:{}})
+    await Bl.destroy({where:{}})
+    await Container_Info.destroy({where:{}})
+    res.json({status:'success', result:result});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+
 routes.post("/deleteInvoices", async(req, res) => {
   try {
     const result = await Invoice.destroy({
-      where:{companyId:'3'}
+      where:{
+        companyId:'3',
+        currency:"USD"
+      }
     })
     res.json({status:'success', result:result});
   }
@@ -823,6 +840,12 @@ routes.post("/testDeleteVouchers", async (req, res) => {
 
     await Vouchers.destroy({where:{}})
     await Voucher_Heads.destroy({where:{}})
+    await Invoice.destroy({where:{}});
+    await Client_Associations.destroy({where:{}});
+    await Vendor_Associations.destroy({where:{}});
+    await Child_Account.destroy({where:{}});
+    await Parent_Account.destroy({where:{}});
+
     await res.json({ status: "success"});
   } catch (error) {
     res.json({ status: "error", result: error });
