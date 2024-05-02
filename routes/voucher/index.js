@@ -273,7 +273,15 @@ routes.get("/getVoucherById", async (req, res) => {
   try {
     const result = await Vouchers.findOne({
       where: { id: req.headers.id },
-      include: [{ model: Voucher_Heads }],
+      include: [
+        { 
+          model: Voucher_Heads,
+          include:[{
+            model:Child_Account,
+            attributes:['title']
+          }]
+        }
+      ],
     });
     await res.json({ status: "success", result: result });
   } catch (error) {

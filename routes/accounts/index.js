@@ -781,12 +781,12 @@ routes.post("/countAll", async(req, res) => {
 
 routes.post("/deleteAll", async(req, res) => {
   try {
-    await Parent_Account.destroy({where:{}})
-    await Child_Account.destroy({where:{}})
-    await Clients.destroy({where:{}})
-    await Vendors.destroy({where:{}})
-    await Client_Associations.destroy({where:{}})
-    await Vendor_Associations.destroy({where:{}})
+    // await Parent_Account.destroy({where:{}})
+    // await Child_Account.destroy({where:{}})
+    // await Clients.destroy({where:{}})
+    // await Vendors.destroy({where:{}})
+    // await Client_Associations.destroy({where:{}})
+    // await Vendor_Associations.destroy({where:{}})
     await Invoice.destroy({where:{}})
     res.json({status:'success'});
   }
