@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         narration:{
-            type:DataTypes.STRING
+            type:DataTypes.TEXT
         },
         settlement:{
             type:DataTypes.STRING

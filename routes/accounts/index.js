@@ -35,7 +35,7 @@ async function getAllAccounts(id){
     }]
   });
   return result;
-}
+};
 
 routes.post("/createParentAccount", async(req, res) => {
   try {
@@ -143,13 +143,15 @@ routes.get("/getAllAccounts", async(req, res) => {
 routes.get("/getAccountsForTransaction", async(req, res) => {
     let obj = { };
     let ChildObj = { };
+    console.log(req.headers.companyid)
     if(req.headers.type=="Bank") {
         ChildObj = {subCategory:'Bank'}
+        obj.CompanyId = req.headers.companyid
       } else if(req.headers.type=="Cash"){
-      obj = {
-      }
+        obj.CompanyId = req.headers.companyid
       ChildObj = {subCategory:'Cash'}
     } else if(req.headers.type=='Adjust') {
+        obj.CompanyId = req.headers.companyid
         ChildObj = {subCategory:'General'}
         //   obj = {
         //     [Op.and]: [
@@ -183,10 +185,9 @@ routes.get("/getAccountsForTransaction", async(req, res) => {
         title:req.headers.type,
         CompanyId:parseInt(req.headers.companyid),
       }
-    }else {
+    } else {
       obj = { title:req.headers.type }
     }
-
     try {
       const result = await Child_Account.findAll({
         where:ChildObj,
@@ -588,32 +589,33 @@ routes.get("/getByDate", async(req, res) => {
   catch (error) {
     res.json({status:'error', result:error});
   }
-})
+});
 
 routes.get("/getLedger", async(req, res) => {
   try {
     const result = await Voucher_Heads.findAll({
-        raw:true,
-        where:{ 
-            ChildAccountId:req.headers.id,
-            createdAt:{
-                [Op.lte]: moment(req.headers.to).add(1, 'days').toDate(),
-            }
-        },
-        attributes:['amount', 'type', 'narration', 'createdAt', 'defaultAmount'],
-        include:[{
-            model:Vouchers,
-            attributes:['voucher_Id', 'id', 'type', 'currency', 'exRate', 'vType'],
-            where:{currency:req.headers.currency}
-        }],
-        order:[["createdAt","ASC"]],
+      raw:true,
+      where:{
+        ChildAccountId:req.headers.id,
+        createdAt:{
+          [Op.lte]: moment(req.headers.to).add(1, 'days').toDate(),
+        }
+      },
+      attributes:['amount', 'type', 'narration', 'createdAt', 'defaultAmount'],
+      include:[{
+        model:Vouchers,
+        attributes:['voucher_Id', 'id', 'type', 'currency', 'exRate', 'vType'],
+        where:{
+          currency:req.headers.currency
+        }
+      }],
+      order:[["createdAt","ASC"]],
     })
     res.json({status:'success', result:result});
-  }
-  catch (error) {
+  } catch (error) {
     res.json({status:'error', result:error});
   }
-})
+});
 
 routes.get("/parentAccounts", async(req, res) => {
   try {
@@ -744,7 +746,6 @@ routes.post("/createVendorInBulk", async(req, res) => {
 routes.post("/nonGlInBulk", async(req, res) => {
 
   let obj = req.body;
-  console.log(obj)
   try {
     obj.forEach(async(x)=>{
       let value = {...x};
@@ -753,10 +754,7 @@ routes.post("/nonGlInBulk", async(req, res) => {
       value.docRepresentatorId     = null;
       value.authorizedById         = null;
       value.createdBy              = "";
-      await Clients.create({...value})
-      .then((x)=>{
-        console.log(x)
-      })
+      await Clients.create({...value});
     });
     await res.json({status:'success'});
   }
@@ -769,10 +767,13 @@ routes.post("/countAll", async(req, res) => {
   try {
     const clients = await Clients.count();
     const vendors = await Vendors.count();
-    res.json({status:'success', result:{
-      clients,
-      vendors
-    }});
+    res.json({
+      status:'success',
+      result:{
+        clients,
+        vendors
+      }
+    });
   }
   catch (error) {
     res.json({status:'error', result:error});
@@ -855,37 +856,37 @@ routes.post("/testDeleteVouchers", async (req, res) => {
 routes.post("/createOpeningBalances", async(req, res) => {
 
   const setVoucherHeads = (id, heads) => {
-        let result = [];
-        heads.forEach((x) => {
-          result.push({
-            ...x,
-            VoucherId: id,
-            amount: `${x.amount}`,
-            createdAt:'2003-09-11 11:11:38.662+00',
-          });
-        });
-        return result;
+    let result = [];
+    heads.forEach((x) => {
+      result.push({
+        ...x,
+        VoucherId: id,
+        amount: `${x.amount}`,
+        createdAt:'2003-09-11 11:11:38.662+00',
+      });
+    });
+    return result;
   };
 
   try {
     const check = await Vouchers.findOne({
-        order:[["voucher_No","DESC"]],
-        attributes:["voucher_No"],
-        where:{ vType: req.body.vType}
+      order:[["voucher_No","DESC"]],
+      attributes:["voucher_No"],
+      where:{ vType: req.body.vType}
     });
     const result = await Vouchers.create({
-        ...req.body,
-        CompanyId:req.body.companyId,
-        voucher_No: check == null ? 1 : parseInt(check.voucher_No) + 1,
-        voucher_Id: `${
-          req.body.companyId == 1 ?
-            "SNS" :
-            req.body.companyId == 2?
-                "CLS" : "ACS"
-            }-${req.body.vType}-${
-            check == null ? 1 : parseInt(check.voucher_No) + 1
-            }/${moment().format("YY")
-        }`,
+      ...req.body,
+      CompanyId:req.body.companyId,
+      voucher_No: check == null ? 1 : parseInt(check.voucher_No) + 1,
+      voucher_Id: `${
+        req.body.companyId == 1 ?
+          "SNS" :
+          req.body.companyId == 2?
+              "CLS" : "ACS"
+          }-${req.body.vType}-${
+          check == null ? 1 : parseInt(check.voucher_No) + 1
+          }/${moment().format("YY")
+      }`,
     });
     let dataz = await setVoucherHeads(result.id, req.body.Voucher_Heads);
     await Voucher_Heads.bulkCreate(dataz);
@@ -900,8 +901,8 @@ routes.get("/getOpeningBalances", async(req, res) => {
   try {
     const results = await Vouchers.findAll({
       where: {
-          CompanyId : req.headers.id,
-          vType:"OP"
+        CompanyId: req.headers.id,
+        vType:"OP"
       }
     })
     res.json({status:'success', result:results});

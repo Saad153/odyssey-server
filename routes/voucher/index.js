@@ -257,6 +257,7 @@ routes.get("/getAllJobPayRecVouchers", async (req, res) => {
     const result = await Vouchers.findAll({
       order: [["createdAt", "DESC"]],
       where: {
+        CompanyId:req.headers.companyid,
         [Op.or]: [
           { type: "Job Reciept" },
           { type: "Job Payment" },
