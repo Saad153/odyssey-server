@@ -800,7 +800,14 @@ routes.get("/jobBalancing", async (req, res) => {
     // party wise invoice/bill
     req.headers.party?invoiceObj.party_Id=req.headers.party:null;
     // Company wise invoice/bill
-    req.headers.company?invoiceObj.companyId=req.headers.company:null;
+    if(req.headers.company=='4'){
+      invoiceObj = {
+        ...invoiceObj,
+        [Op.or]: [{companyId: '1'}, {companyId:'3'}]
+      }
+    } else {
+      req.headers.company?invoiceObj.companyId=req.headers.company:null;
+    }
     // Currency wise invoice/bill
     req.headers.currency?invoiceObj.currency=req.headers.currency:null;
     // Job Type/operation wise invoice/bill
@@ -823,7 +830,6 @@ routes.get("/jobBalancing", async (req, res) => {
     }
     // overseas agent wise invoice/bill
     req.headers.overseasagent?includeObj.where = {overseasAgentId:req.headers.overseasagent}:null;
-
     const result = await Invoice.findAll({
       where:invoiceObj,
       attributes:['id','invoice_No', 'payType', 'currency', 'ex_rate', 'roundOff', 'total', 'paid', 'recieved', 'createdAt', 'party_Name'],
