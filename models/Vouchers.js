@@ -79,6 +79,9 @@ module.exports = (sequelize, DataTypes) => {
         subType:{
             type:DataTypes.STRING,
         },
+        createdBy:{
+            type:DataTypes.STRING,
+        },
     })
     return Vouchers;
 }

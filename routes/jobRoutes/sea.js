@@ -156,29 +156,29 @@ routes.get("/getValues", async(req, res) => {
 });
 
 routes.post("/getNotes", async(req, res) => {
-    try {
-      const result = await Job_notes.findAll({
-        where:{type: req.body.type, recordId:req.body.id},
-        order:[["createdAt", "DESC"]],
-      });
-      res.json({status:'success', result:result});
-    }
-    catch (error) {
-      res.json({status:'error', result:error});
-    }
+  try {
+    const result = await Job_notes.findAll({
+      where:{type: req.body.type, recordId:req.body.id},
+      order:[["createdAt", "DESC"]],
+    });
+    res.json({status:'success', result:result});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
 });
 
 routes.get("/getAllNotes", async(req, res) => {
-    try {
-      const result = await Job_notes.findAll({
-        // where:{type:"SE", recordId:req.body.id},
-        order:[["createdAt", "DESC"]],
-      });
-      res.json({status:'success', result:result});
-    }
-    catch (error) {
-      res.json({status:'error', result:error});
-    }
+  try {
+    const result = await Job_notes.findAll({
+      // where:{type:"SE", recordId:req.body.id},
+      order:[["createdAt", "DESC"]],
+    });
+    res.json({status:'success', result:result});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
 });
 
 routes.post('/updateNotes', async(req, res) => {
@@ -193,13 +193,13 @@ routes.post('/updateNotes', async(req, res) => {
 });
 
 routes.post("/addNote", async(req, res) => {
-    try {
-        const result = await Job_notes.create(req.body);
-        res.json({status:'success', result:result});
-    }
-    catch (error) {
-      res.json({status:'error', result:error});
-    }
+  try {
+      const result = await Job_notes.create(req.body);
+      res.json({status:'success', result:result});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
 });
 
 routes.post("/create", async(req, res) => {

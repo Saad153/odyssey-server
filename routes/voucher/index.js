@@ -230,7 +230,7 @@ routes.get("/getAccountActivity", async (req, res) => {
 
 routes.get("/getAllVouchers", async (req, res) => {
   try {
-
+    console.log()
     const result = await Vouchers.findAll({
       where: {
         CompanyId: req.headers.id,
@@ -252,6 +252,30 @@ routes.get("/getAllVouchers", async (req, res) => {
   }
 });
 
+routes.get("/testgetAll", async (req, res) => {
+  try {
+    const result = await Vouchers.findAll({
+      where: {
+        CompanyId: req.headers.id,
+        // [Op.and]: [
+        //   { type: { [Op.ne]: "Job Payment" } },
+        //   { type: { [Op.ne]: "Job Reciept" } },
+        // ]
+      },
+      attributes: ['createdAt', 'voucher_Id'],
+      // include: [{
+      //   model: Voucher_Heads,
+      //   attributes: ['type', 'amount'],
+      //   where: { type: "debit" }
+      // }],
+      order: [["createdAt", "DESC"]],
+    });
+    await res.json({ status: "success", result: result, count:1 });
+  } catch (error) {
+    res.json({ status: "error", result: error });
+  }
+});
+
 routes.get("/getAllJobPayRecVouchers", async (req, res) => {
   try {
     const result = await Vouchers.findAll({
@@ -262,7 +286,12 @@ routes.get("/getAllJobPayRecVouchers", async (req, res) => {
           { type: "Job Reciept" },
           { type: "Job Payment" },
         ],
-      }
+      },
+      include: [{
+        model: Voucher_Heads,
+        attributes: ['type', 'amount'],
+        where: { type: "debit" }
+      }],
     });
     await res.json({ status: "success", result: result });
   } catch (error) {
