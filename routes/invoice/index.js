@@ -862,8 +862,14 @@ routes.get("/invoiceBalancing", async (req, res) => {
     if(req.headers.paytype!="All"){
       invoiceObj.payType=req.headers.paytype
     }
-
-    req.headers.company?invoiceObj.companyId=req.headers.company:null;
+    if(req.headers.company=='4'){
+      invoiceObj = {
+        ...invoiceObj,
+        [Op.or]: [{companyId: '1'}, {companyId:'3'}]
+      }
+    } else {
+      req.headers.company?invoiceObj.companyId=req.headers.company:null;
+    }
     // req.headers.currency?invoiceObj.currency=req.headers.currency:null;
     // req.headers.jobtypes?.length>0?invoiceObj.operation=req.headers.jobtypes.split(","):null;
     
