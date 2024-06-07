@@ -817,16 +817,10 @@ routes.get("/jobBalancing", async (req, res) => {
     let includeObj = {
       model:SE_Job,
       include:[
-        {
-          model:Bl,
-          attributes:['hbl'],
-        },
-        {
-          model:SE_Equipments,
-          attributes:['qty', 'size']
-        }
+        { model:Bl, attributes:['hbl'] },
+        { model:SE_Equipments, attributes:['qty', 'size'] }
       ],
-      attributes:['id', 'fd', 'freightType'],
+      attributes:['id', 'fd', 'freightType', 'jobNo', 'operation'],
     }
     // overseas agent wise invoice/bill
     req.headers.overseasagent?includeObj.where = {overseasAgentId:req.headers.overseasagent}:null;
@@ -876,7 +870,7 @@ routes.get("/invoiceBalancing", async (req, res) => {
     (req.headers.overseasagent!=''&&req.headers.overseasagent!=null)?invoiceObj.party_Id=req.headers.overseasagent:null;
     const result = await Invoice.findAll({
       where:invoiceObj,
-      attributes:['invoice_No', 'payType', 'currency', 'ex_rate', 'roundOff', 'total', 'paid', 'recieved', 'createdAt', 'party_Name'],
+      attributes:['id', 'invoice_No', 'payType', 'currency', 'ex_rate', 'roundOff', 'total', 'paid', 'recieved', 'createdAt', 'party_Name'],
       include:[{
         model:SE_Job,
         include:[
@@ -890,7 +884,7 @@ routes.get("/invoiceBalancing", async (req, res) => {
           }
         ],
         order: [[ 'createdAt', 'ASC' ]],
-        attributes:['id', 'fd', 'freightType'],
+        attributes:['id', 'fd', 'freightType', 'jobNo', 'operation'],
       }]
     });
     await res.json({ status: "success", result: result });
