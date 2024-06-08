@@ -278,12 +278,16 @@ routes.get("/get", async(req, res) => {
       include:[
         //{model:Voyage},
         {model:Employees, as:'created_by', attributes:['name'] },
-        //{model:SE_Equipments},
+        {
+          model:Bl,
+          attributes:['hbl', 'mbl']
+        },
         {
           model:Clients,
           attributes:['name']
         }
       ],
+      attributes:['id', 'createdAt', 'jobNo', 'nomination', 'freightType', 'pol', 'pod', 'fd', 'weight', 'transportCheck', 'customCheck'],
       order:[["createdAt", "DESC"]],
     }).catch((x)=>console.log(x))
     res.json({status:'success', result:result});
