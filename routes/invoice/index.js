@@ -298,6 +298,7 @@ routes.get("/testResetSomeInvoices", async(req, res) => {
 });
 
 routes.get("/getAllInoivcesByPartyId", async(req, res) => {
+  console.log(req.headers.voucherid + " <<<<=================")
   try {
     let obj = {
       approved:"1",
@@ -334,10 +335,7 @@ routes.get("/getAllInoivcesByPartyId", async(req, res) => {
       obj.id = req.headers.invoices.split(", ")
       transactionObj = [
         ...transactionObj,
-        {
-          model:Invoice_Transactions,
-          where:{VoucherId:req.headers.voucherid}
-        }
+        { model:Invoice_Transactions, where:{VoucherId:req.headers.voucherid} }
       ]
     } else {
       obj.status = { [Op.ne]: '2' }
@@ -549,13 +547,12 @@ routes.get("/getTransaction", async(req, res) => {
 routes.post("/createInvoiceTransaction", async(req, res) => {
   try {
     req.body.invoices.forEach(async(x) => {
-      await Invoice.update(x, {where:{id:x.id}});
+      Invoice.update(x, {where:{id:x.id}});
     })
     req.body.invoiceLosses.forEach(async(y)=>{
-      await Invoice_Transactions.upsert(y)
+      Invoice_Transactions.upsert(y)
     })
-    //await Invoice_Transactions.bulkCreate(req.body.invoiceLosses);
-    await res.json({status: 'success', result: 'result'});
+    res.json({status: 'success', result: 'result'});
   }
   catch (error) {
     res.json({status: 'error', result: error});
