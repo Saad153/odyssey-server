@@ -302,11 +302,13 @@ routes.get("/getJobById", async(req, res) => {
         const result = await SE_Job.findOne({
           where:{id:req.headers.id},
           include:[
-            {model:SE_Equipments},
-              {
-                model:Clients,
-                attributes:['name']
-              }
+            {
+              model:SE_Equipments
+            },
+            {
+              model:Clients,
+              attributes:['name']
+            }
           ],
           order:[["createdAt", "DESC"]],
         });
