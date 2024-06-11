@@ -51,7 +51,7 @@ app.use(express.json());
 db.sequelize.sync();
 
 app.get("/getUser", verify, (req, res) => {res.json({isLoggedIn:true,username:req.body.username})});
-app.get("/", (req, res) => { res.json('Welcome To Odyssey Server in Hail Dot Tech') });
+app.get("/", (req, res) => { res.json('Welcome To Odyssey Server in Hail Dot Tech on Koyeb') });
 app.use("/home", homeAccountRoutes, homeOperationsRoutes, homeDashboardRoutes);
 app.use("/misc", miscPartiesRoutes, miscProfitLossRoutes, misctrialBalanceRoutes);
 app.use("/notifications", notificationRoutes);
