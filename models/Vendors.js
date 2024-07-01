@@ -32,6 +32,10 @@ module.exports = (sequelize, DataTypes) => {
         micrCode: { type:DataTypes.STRING },
         currency: { type:DataTypes.STRING },
         createdBy:{ type:DataTypes.STRING },
+        active:{
+          type:DataTypes.BOOLEAN,
+          defaultValue:0.0
+        },
     })
     return Vendors;
 }

@@ -1,5 +1,4 @@
-const { Loading_Program, Item_Details, Dimensions, Delivery_Order, Manifest, Manifest_Jobs,
-    SE_Job, SE_Equipments, Commodity, Bl, Container_Info, Vessel, Job_notes, Stamps } = require("../../../models");
+const { Loading_Program, Item_Details, Dimensions, Delivery_Order, Manifest, Manifest_Jobs, SE_Job, SE_Equipments, Commodity, Bl, Container_Info, Vessel, Job_notes, Stamps } = require("../../../models");
 const { Employees } = require("../employeeAssociations");
 const { Vendors   } = require("../vendorAssociations");
 const { Voyage    } = require("../vesselAssociations");

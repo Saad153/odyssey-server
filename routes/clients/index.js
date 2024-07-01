@@ -164,7 +164,7 @@ routes.get("/getClients", async(req, res) => {
     try {
         const result = await Clients.findAll({
             where:{[Op.and]:[{nongl:{[Op.eq]:null}}]},
-            attributes:['id', 'name' , 'person1', 'mobile1', 'person2', 'mobile2', 'telephone1', 'telephone2', 'address1', 'address2', 'createdBy', 'code'],
+            attributes:['id', 'name' , 'person1', 'mobile1', 'person2', 'mobile2', 'telephone1', 'telephone2', 'address1', 'address2', 'createdBy', 'code', 'active'],
             order: [['createdAt', 'DESC'], /* ['name', 'ASC'],*/] 
         });
         res.json({status:'success', result:result});
@@ -202,7 +202,8 @@ routes.get("/getNotifyParties", async(req, res) => {
     try {
         const result = await Clients.findAll({
             where:{
-                types:{[Op.substring]: 'Notify'}
+                types:{[Op.substring]: 'Notify'},
+                
             },
             attributes:['id','name', 'address1', 'address1', 'person1', 'mobile1',
             'person2', 'mobile2', 'telephone1', 'telephone2', 'infoMail'],

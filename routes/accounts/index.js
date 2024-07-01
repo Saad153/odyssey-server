@@ -617,6 +617,28 @@ routes.get("/getLedger", async(req, res) => {
   }
 });
 
+routes.get("/getLedgerClosingBalance", async(req, res) => {
+  try {
+    const result = await Voucher_Heads.findAll({
+      raw:true,
+      where:{
+        ChildAccountId:req.headers.id
+      },
+      attributes:['amount', 'type', 'defaultAmount'],
+      include:[{
+        model:Vouchers,
+        attributes:['voucher_Id', 'id', 'type', 'currency', 'exRate', 'vType'],
+        where:{
+          currency:req.headers.currency
+        }
+      }],
+    })
+    res.json({status:'success', result:result});
+  } catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+
 routes.get("/parentAccounts", async(req, res) => {
   try {
     const results = await Parent_Account.findAll({where: {CompanyId : req.headers.id}})

@@ -83,6 +83,9 @@ routes.get("/getValues", async(req, res) => {
 
   try {
     const resultOne = await Clients.findAll({ 
+      where:{
+        active:true
+      },
       attributes:['id','name', 'types', 'code', 'nongl'],
       order: [['createdAt', 'DESC']]
     })
@@ -93,7 +96,9 @@ routes.get("/getValues", async(req, res) => {
             { [Op.substring]: 'Shipper' },
             { [Op.substring]: 'Consignee' },
             { [Op.substring]: 'Notify' }]
-      }},
+        },
+        active:true
+      },
       attributes:['id','name', 'types', 'code'],
       order: [['createdAt', 'DESC']]
     })
@@ -109,7 +114,9 @@ routes.get("/getValues", async(req, res) => {
             { [Op.substring]: 'Air Line' },
             { [Op.substring]: 'Shipping Line' }
           ]
-      }},
+        },
+        active:true
+      },
       attributes:['id','name', 'types', 'code'],
       order: [['createdAt', 'DESC']]
     })
