@@ -294,7 +294,7 @@ routes.get("/get", async(req, res) => {
           attributes:['name']
         }
       ],
-      attributes:['id', 'createdAt', 'jobNo', 'nomination', 'freightType', 'pol', 'pod', 'fd', 'weight', 'transportCheck', 'customCheck'],
+      attributes:['id', 'createdAt','approved', 'jobNo', 'nomination', 'freightType', 'pol', 'pod', 'fd', 'weight', 'transportCheck', 'customCheck'],
       order:[["createdAt", "DESC"]],
     }).catch((x)=>console.log(x))
     res.json({status:'success', result:result});
