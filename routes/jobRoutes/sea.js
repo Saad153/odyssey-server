@@ -406,48 +406,56 @@ routes.get("/getJobsWithoutBl", async(req, res) => {
 routes.post("/createBl", async(req, res) => {
   try {
     let data = req.body;
-    delete data.id
-    let obj = {
-      pkgUnit:data.unit, 
-      pcs:data.pkgs, 
-      weightUnit:data.wtUnit, 
-      vol:data.cbm, 
-      shpVol:data.cbm,
-      weight:data.gross,
-      cwtClient:data.chargableWt
-    }
-    if(data.operation=="SI" || data.operation=="AI" || data.operation=="SE"){
-      // console.log("Here")
-      await SE_Job.update({
-        ...obj
-      }, {where:{id:data.SEJobId}});
-    }
-    const check = await Bl.findOne({order: [['no', 'DESC']], attributes:["no"] })
-    const result = await Bl.create({...data, 
-      no:check==null?1:parseInt(check.no)+1, 
-      // hbl:data.operation=="SE"?`SNSL${ check==null?1:parseInt(check.no)+1 }`:data.hbl
-    }).catch((x)=>console.log(x))
-    // Creating Items for AE
-    if(data.Item_Details.length>0){
-      let tempItems = [];
-      data.Item_Details.forEach((x)=>{
-        x.id==null?delete x.id:null;
-        tempItems.push({...x, BlId:result.id})
+    delete data.id;
+
+    const check = await Bl.findOne({
+      where:{ [Op.or]: [{mbl: data.mbl}, {hbl: data.hbl}]},
+      attributes:["mbl", "hbl"] 
+    });
+    if(check?.dataValues==null){
+      let obj = {
+        pkgUnit:data.unit, 
+        pcs:data.pkgs, 
+        weightUnit:data.wtUnit, 
+        vol:data.cbm, 
+        shpVol:data.cbm,
+        weight:data.gross,
+        cwtClient:data.chargableWt
+      }
+      if(data.operation=="SI" || data.operation=="AI" || data.operation=="SE"){
+        // console.log("Here")
+        await SE_Job.update({
+          ...obj
+        }, {where:{id:data.SEJobId}});
+      }
+      const result = await Bl.create({...data,
+        // hbl:data.operation=="SE"?`SNSL${ check==null?1:parseInt(check.no)+1 }`:data.hbl
+      }).catch((x)=>console.log(x))
+      // Creating Items for AE
+      if(data.Item_Details.length>0){
+        let tempItems = [];
+        data.Item_Details.forEach((x)=>{
+          x.id==null?delete x.id:null;
+          tempItems.push({...x, BlId:result.id})
+        })
+        await Item_Details.bulkCreate(tempItems)
+      }
+      await data.Container_Infos.forEach((x, i)=>{
+        data.Container_Infos[i] = {...x, BlId:result.id}
       })
-      await Item_Details.bulkCreate(tempItems)
+      await Container_Info.bulkCreate(data.Container_Infos).catch((x)=>console.log(x))
+      if(data.Dimensions.length>0){
+        data.Dimensions.forEach((x, i)=>{
+          x.id==null?delete x.id:null;
+          data.Dimensions[i] = {...x, BlId:result.id}
+        })
+        await Dimensions.bulkCreate(data.Dimensions).catch((x)=>console.log(x))
+      }
+      res.json({status:'success', result:result.id });
+    } else {
+      res.json({status:'warning', result:"Mbl or Hbl Already Exists" });
     }
-    await data.Container_Infos.forEach((x, i)=>{
-      data.Container_Infos[i] = {...x, BlId:result.id}
-    })
-    await Container_Info.bulkCreate(data.Container_Infos).catch((x)=>console.log(x))
-    if(data.Dimensions.length>0){
-      data.Dimensions.forEach((x, i)=>{
-        x.id==null?delete x.id:null;
-        data.Dimensions[i] = {...x, BlId:result.id}
-      })
-      await Dimensions.bulkCreate(data.Dimensions).catch((x)=>console.log(x))
-    }
-    res.json({status:'success', result:result.id  });
+
   }
   catch (error) {
     res.json({status:'error', result:error});

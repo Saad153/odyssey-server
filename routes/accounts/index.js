@@ -1,6 +1,7 @@
 const moment = require("moment");
 const db = require("../../models");
-const { Op } = require("sequelize");
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 const routes = require('express').Router();
 const { Accounts } = require('../../models/');
 const { Invoice } = require("../../functions/Associations/incoiceAssociations");
@@ -676,10 +677,49 @@ routes.post("/accountCreate", async(req, res) => {
   }
 });
 
-routes.post("/testCreateClient", async(req, res) => {
+routes.get("/testCreateClient", async(req, res) => {
 
   try {
-    await res.json({status:'success', result});
+    const result = await Invoice.findAll({
+      offset:300,
+      limit:100,
+      where:{ 
+        invoice_No: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('invoice_No')), 'LIKE', '%' + 'ji' + '%'),
+        [Op.or]: [
+          {type: "Old Job Bill"},
+          {type: "Old Job Invoice"},
+          {type: "Old Agent Invoice"},
+          {type: "Old Agent Bill"},
+          {type: "Old Agent Bill"},
+        ]
+      },
+      attributes:['invoice_No', 'id'],
+    });
+    let temp = await result.map((x) => {
+      console.log(x.dataValues)
+      return{
+        ...x.dataValues,
+        invoice_No:x.dataValues.invoice_No+ '-O'
+        // invoice_No:x.dataValues.invoice_No+.replace("-O-O","-O")
+      }
+    });
+    res.json({status:'success', result:temp});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+
+routes.post("/testingUpsert", async(req, res) => {
+
+  try {
+    // console.log(req.body.invoices)
+    req.body.invoices.forEach((x)=>{
+      Invoice.upsert(x).then((y)=>{
+        console.log(y)
+      })
+    })
+    res.json({status:'success'});
   }
   catch (error) {
     res.json({status:'error', result:error});
