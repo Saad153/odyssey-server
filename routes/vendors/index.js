@@ -7,32 +7,35 @@ const { Employees } = require("../../functions/Associations/employeeAssociations
 const { Vendors, Vendor_Associations } = require("../../functions/Associations/vendorAssociations");
 const { Child_Account, Parent_Account } = require("../../functions/Associations/accountAssociations");
 
-routes.post("/create", async(req, res) => {
-    const createChildAccounts = (list, name) => {
-        let result = [];
-        list.forEach((x)=>{
-            result.push({title:name, ParentAccountId:x.id, subCategory:'Vendor'})
-        });
-        return result;
-    }
-    const createAccountList = (parent, child, id) => {
-        let result = [];
-        parent.forEach((x, i)=>{
-            result[i] = {
-                VendorId:id,
-                CompanyId:x.CompanyId,
-                ParentAccountId:x.id,
-                ChildAccountId:null
+const createAccountList = (parent, child, id) => {
+    let result = [];
+    parent.forEach((x, i)=>{
+        result[i] = {
+            VendorId:id,
+            CompanyId:x.CompanyId,
+            ParentAccountId:x.id,
+            ChildAccountId:null
+        }
+        child.forEach((y, j)=>{
+            if(y.ParentAccountId==x.id){
+                result[i].ChildAccountId=child[j].id
             }
-            child.forEach((y, j)=>{
-                if(y.ParentAccountId==x.id){
-                    result[i].ChildAccountId=child[j].id
-                }
-            })
         })
-        //console.log(result)
-        return result;
-    }
+    })
+    //console.log(result)
+    return result;
+}
+
+const createChildAccounts = (list, name) => {
+    let result = [];
+    list.forEach((x)=>{
+        result.push({title:name, ParentAccountId:x.id, subCategory:'Vendor'})
+    });
+    return result;
+}
+
+routes.post("/create", async(req, res) => {
+
     try {
         let value = req.body;
         value.operations = value.operations.join(', ');
@@ -78,23 +81,25 @@ routes.post("/edit", async(req, res) => {
         const vendorAssociation = await Vendor_Associations.findAll({
             where:{VendorId:value.id},
         });
-        vendorAssociation.forEach(async(x)=>{
-            //console.log(x.CompanyId);
-            ids.push(x.ChildAccountId);
-            let tempChildId = pAccountList.find((y)=>y.CompanyId==x.CompanyId).id
-            await Vendor_Associations.update({ParentAccountId:tempChildId}, {where:{id:x.id}})
-        });
-        await Child_Account.update({ title:value.name }, { where:{ id:ids } });
-        
-        // await History.create({
-        //     html:req.body.history, EmployeeId:req.body.EmployeeId, updateDate:req.body.updateDate,
-        //     recordId:value.id, type:"vendor"
-        // }).catch((x)=>console.log(x))
-        // const finalResult = await Vendors.findOne({
-        //     where:{id:value.id},
-        //     include:[{ model:Vendor_Associations }]
-        // }).catch((x)=>console.log(x))
-
+        if(vendorAssociation.length==0){
+            console.log("No Vendor Associations")
+            const accounts = await Parent_Account.findAll({
+              where: {
+                //CompanyId: { [Op.or]: value.companies },
+                title: { [Op.or]: [`${req.body.pAccountName}`] }
+              }
+            });
+            const accountsList = await Child_Account.bulkCreate(createChildAccounts(accounts, value.name));
+            await Vendor_Associations.bulkCreate(createAccountList(accounts, accountsList, value.id)).catch((x)=>console.log(x))
+        } else {
+            console.log("Vendor Associations")
+            vendorAssociation.forEach(async(x)=>{
+              ids.push(x.ChildAccountId);
+              let tempChildId = pAccountList?.find((y)=>y.CompanyId==x.CompanyId)?.id
+              await Vendor_Associations.update({ParentAccountId:tempChildId}, {where:{id:x.id}})
+            });
+            await Child_Account.update({ title:value.name }, { where:{ id:ids } })
+        }
         res.json({status:'success'});
     }
     catch (error) {

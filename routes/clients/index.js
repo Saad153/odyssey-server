@@ -7,31 +7,33 @@ const { Employees } = require("../../functions/Associations/employeeAssociations
 const { Clients, Client_Associations } = require("../../functions/Associations/clientAssociation");
 const { Child_Account, Parent_Account } = require("../../functions/Associations/accountAssociations");
 
-routes.post("/createClient", async(req, res) => {
-    const createChildAccounts = (list, name) => {
-        let result = [];
-        list.forEach((x)=>{
-            result.push({title:name, ParentAccountId:x.id, subCategory:'Customer'})
-        })
-        return result;
-    }
-    const createAccountList = (parent, child, id) => {
-        let result = [];
-        parent.forEach((x, i)=>{
-            result[i] = {
-                ClientId:id,
-                CompanyId:x.CompanyId,
-                ParentAccountId:x.id,
-                ChildAccountId:null
+const createChildAccounts = (list, name) => {
+    let result = [];
+    list.forEach((x)=>{
+        result.push({title:name, ParentAccountId:x.id, subCategory:'Customer'})
+    })
+    return result;
+}
+const createAccountList = (parent, child, id) => {
+    let result = [];
+    parent.forEach((x, i)=>{
+        result[i] = {
+            ClientId:id,
+            CompanyId:x.CompanyId,
+            ParentAccountId:x.id,
+            ChildAccountId:null
+        }
+        child.forEach((y, j)=>{
+            if(y.ParentAccountId==x.id){
+                result[i].ChildAccountId=child[j].id
             }
-            child.forEach((y, j)=>{
-                if(y.ParentAccountId==x.id){
-                    result[i].ChildAccountId=child[j].id
-                }
-            })
         })
-        return result;
-    }
+    })
+    return result;
+}
+
+routes.post("/createClient", async(req, res) => {
+    
     try {
         let value = req.body;
         value.operations = value.operations.join(', ');
@@ -59,10 +61,7 @@ routes.post("/createClient", async(req, res) => {
         value.authorizedById = value.authorizedById==""?null:value.authorizedById;
         const result = await Clients.create({...value, code : parseInt(check.code) + 1 }).catch((x)=>console.log(x))
         const accounts = await Parent_Account.findAll({
-            where: {
-                //CompanyId: { [Op.or]: value.companies },
-                title: { [Op.or]: [`${req.body.pAccountName}`] }
-            }
+            where: { title: { [Op.or]: [`${req.body.pAccountName}`] } }
         });
         const accountsList = await Child_Account.bulkCreate(createChildAccounts(accounts, result.name));
         await Client_Associations.bulkCreate(createAccountList(accounts, accountsList, result.id));
@@ -140,19 +139,25 @@ routes.post("/editClient", async(req, res) => {
         value.types = value.types.join(', ');
 
         await Clients.update({...value, code: parseInt(value.code)},{where:{id:value.id}});
-
-        const pAccountList = await Parent_Account.findAll({
-            where:{title:req.body.pAccountName}
-        })
+        const pAccountList = await Parent_Account.findAll({where:{title:req.body.pAccountName}})
         const clientAssociation = await Client_Associations.findAll({
             where:{ClientId:value.id},
         });
-        clientAssociation.forEach(async(x)=>{
-            ids.push(x.ChildAccountId);
-            let tempChildId = pAccountList.find((y)=>y.CompanyId==x.CompanyId).id
-            await Client_Associations.update({ParentAccountId:tempChildId}, {where:{id:x.id}})
-        });
-        await Child_Account.update({ title:value.name }, { where:{ id:ids } });
+        if(clientAssociation.length==0){
+            console.log("No Client Associations")
+            const accounts = await Parent_Account.findAll({
+              where: { title: { [Op.or]: [`${req.body.pAccountName}`] } }
+            });
+            const accountsList = await Child_Account.bulkCreate(createChildAccounts(accounts, value.name));
+            await clientAssociation.bulkCreate(createAccountList(accounts, accountsList, value.id)).catch((x)=>console.log(x))
+        } else {
+            clientAssociation.forEach(async(x)=>{
+                ids.push(x.ChildAccountId);
+                let tempChildId = pAccountList.find((y)=>y.CompanyId==x.CompanyId).id
+                await Client_Associations.update({ParentAccountId:tempChildId}, {where:{id:x.id}})
+            });
+            await Child_Account.update({ title:value.name }, { where:{ id:ids } });
+        }
         res.json({status:'success'});
     }
     catch (error) {
