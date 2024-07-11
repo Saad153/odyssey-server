@@ -297,6 +297,19 @@ routes.get("/getAllChilds", async(req, res) => {
   }
 });
 
+routes.get("/getAllParents", async(req, res) => {
+  try {
+    const result = await Parent_Account.findAll({
+      attributes:["title", "id"],
+      where:{CompanyId:req.headers.companyid},
+    });
+    res.json({status:'success', result:result});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+
 routes.get("/getSEJobChilds", async(req, res) => {
   try {
 

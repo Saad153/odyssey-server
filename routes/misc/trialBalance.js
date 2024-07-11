@@ -13,10 +13,15 @@ const Op = Sequelize.Op;
 
 routes.get(`/${url}/get`, async(req, res) => {
   try {
-    console.log(req.headers.company)
+    let obj = {
+      CompanyId:req.headers.company
+    }
+    if(req.headers.accountid){
+      obj.id = req.headers.accountid
+    }
     const result = await Parent_Account.findAll({
       attributes:['id', 'title'],
-      where:{CompanyId:req.headers.company},
+      where:obj,
       include:[{
         model:Child_Account,
         attributes:['id', 'title'],
