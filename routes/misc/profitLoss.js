@@ -4,6 +4,8 @@ const { Vouchers, Voucher_Heads }=require("../../functions/Associations/voucherA
 const { SE_Job } = require("../../functions/Associations/jobAssociations/seaExport");
 const { Vendors } = require("../../functions/Associations/vendorAssociations");
 const { Clients }=require("../../functions/Associations/clientAssociation");
+const { Bl } = require('../../functions/Associations/jobAssociations/seaExport');
+
 const { Accounts } = require('../../models/');
 const routes=require('express').Router();
 const Sequelize=require('sequelize');
@@ -32,9 +34,8 @@ routes.get(`/${url}/job`, async(req, res) => {
     req.headers.overseasagent?obj.overseasAgentId=req.headers.overseasagent:null;
     req.headers.jobtype?obj.operation=req.headers.jobtype.split(","):null;
 
-    console.log("obj",obj)
     const result = await SE_Job.findAll({
-      attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation'],
+      attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight'],
       where:obj,
       include:[
         {
@@ -46,6 +47,9 @@ routes.get(`/${url}/job`, async(req, res) => {
           include:[{
             model:Invoice_Transactions
           }]
+        },
+        { model:Bl, attributes:['hbl']
+
         },
         { model:Clients, attributes:['name'] },
         { model:Clients, as:'shipper', attributes:['name'] },
