@@ -35,7 +35,7 @@ routes.get(`/${url}/job`, async(req, res) => {
     req.headers.jobtype?obj.operation=req.headers.jobtype.split(","):null;
 
     const result = await SE_Job.findAll({
-      attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight'],
+      attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight','subType'],
       where:obj,
       include:[
         {
