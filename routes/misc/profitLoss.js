@@ -23,6 +23,7 @@ routes.get(`/${url}/job`, async(req, res) => {
           obj.companyId = { [Op.in]: ['1', '3'] };
         } else {
           obj.companyId = req.headers.company;
+          obj.subType = req.headers.subtype;
         }
 
        obj.createdAt= {
@@ -33,7 +34,6 @@ routes.get(`/${url}/job`, async(req, res) => {
     req.headers.client?obj.ClientId=req.headers.client:null;
     req.headers.overseasagent?obj.overseasAgentId=req.headers.overseasagent:null;
     req.headers.jobtype?obj.operation=req.headers.jobtype.split(","):null;
-
     const result = await SE_Job.findAll({
       attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight','subType'],
       where:obj,

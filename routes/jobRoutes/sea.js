@@ -222,12 +222,15 @@ routes.post("/create", async(req, res) => {
     return result;
   }
   try {
+
     let data = req.body.data
     delete data.id
     data.customCheck = data.customCheck.toString();
     data.transportCheck = data.transportCheck.toString();
     if(data.operation=="AE"||data.operation=="AI"){
       data.vesselId = null
+      data.subType = "AIR"
+
     } else {
       data.airLineId=null
     }
