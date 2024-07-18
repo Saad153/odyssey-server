@@ -374,25 +374,6 @@ routes.post("/testDeleteVouchers", async (req, res) => {
   }
 });
 
-// routes.get("/findAcsCHF", async (req, res) => {
-//   try {
-
-//     const result = await Vouchers.update(
-//     {
-//       currency:"PKR"
-//     },
-//     {
-//       where:{
-//         currency:"CHF",
-//         CompanyId:3
-//       }
-//     })
-//     await res.json({ status: "success", result:result});
-//   } catch (error) {
-//     res.json({ status: "error", result: error });
-//   }
-// });
-
 routes.post("/getChildAccountIds", async (req, res) => {
   let accountsList = req.body.list;
   let newList = [];
@@ -453,6 +434,20 @@ routes.post("/getChildAccountIds", async (req, res) => {
     res.json({ status: "success", result: { newList, childTwo } });
   } catch (error) {
     res.json({ status: "error" });
+  }
+});
+
+routes.post("/deletePaymentReceipt", async(req, res) => {
+  try {
+
+    await Voucher_Heads.destroy({where:{VoucherId:req.body.id}})
+    await Invoice_Transactions.destroy({where:{VoucherId:req.body.id}})
+    await Vouchers.destroy({where:{id:req.body.id}})
+
+    res.json({status:'success', result});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
   }
 });
 

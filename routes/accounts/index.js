@@ -690,244 +690,6 @@ routes.post("/accountCreate", async(req, res) => {
   }
 });
 
-routes.get("/testCreateClient", async(req, res) => {
-
-  try {
-    const result = await Invoice.findAll({
-      offset:300,
-      limit:100,
-      where:{ 
-        invoice_No: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('invoice_No')), 'LIKE', '%' + 'ji' + '%'),
-        [Op.or]: [
-          {type: "Old Job Bill"},
-          {type: "Old Job Invoice"},
-          {type: "Old Agent Invoice"},
-          {type: "Old Agent Bill"},
-          {type: "Old Agent Bill"},
-        ]
-      },
-      attributes:['invoice_No', 'id'],
-    });
-    let temp = await result.map((x) => {
-      console.log(x.dataValues)
-      return{
-        ...x.dataValues,
-        invoice_No:x.dataValues.invoice_No+ '-O'
-        // invoice_No:x.dataValues.invoice_No+.replace("-O-O","-O")
-      }
-    });
-    res.json({status:'success', result:temp});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/testingUpsert", async(req, res) => {
-
-  try {
-    // console.log(req.body.invoices)
-    req.body.invoices.forEach((x)=>{
-      Invoice.upsert(x).then((y)=>{
-        console.log(y)
-      })
-    })
-    res.json({status:'success'});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/createClientInBulk", async(req, res) => {
-
-  const createAccountList = (parent, id) => {
-    let result = [];
-    parent.forEach((x)=>{
-      x.dataValues.Child_Accounts.forEach((y)=>{
-        result.push({ParentAccountId:x.id, ChildAccountId:y.dataValues.id, CompanyId:x.CompanyId, ClientId:id})
-      })
-    })
-    return result;
-  }
-
-  let obj = req.body;
-  try {
-    obj.forEach(async(x) => {
-      let accountCheck = await Parent_Account.findAll({
-        where:{title:x.account.parent},
-        attributes:['id', 'title', 'CompanyId'],
-        include:[{
-          model:Child_Account,
-          where:{title:x.account.account_title},
-          attributes:['id', 'title'],
-        }]
-      });
-      let value = {...x};
-      value.accountRepresentatorId = null;
-      value.salesRepresentatorId   = null;
-      value.docRepresentatorId     = null;
-      value.authorizedById         = null;
-      value.createdBy              = "";
-      let result = await Clients.create({...value});
-      Client_Associations.bulkCreate(createAccountList(accountCheck, result.dataValues.id));
-    })
-    await res.json({status:'success'});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/createVendorInBulk", async(req, res) => {
-
-    const createAccountList = (parent, id) => {
-        let result = [];
-        parent.forEach((x)=>{
-            x.dataValues.Child_Accounts.forEach((y)=>{
-                result.push({ParentAccountId:x.id, ChildAccountId:y.dataValues.id, CompanyId:x.CompanyId, VendorId:id})
-            })
-        })
-        return result;
-    }
-    let obj = req.body;
-    try {
-      obj.forEach(async(x)=>{    
-          let accountCheck = await Parent_Account.findAll({
-              where:{title:x.account.parent},
-              attributes:['id', 'title', 'CompanyId'],
-              include:[{
-                  model:Child_Account,
-                  where:{title:x.account.account_title},
-                  attributes:['id', 'title'],
-              }]
-          })
-          let value = {...x};
-          value.accountRepresentatorId = null;
-          value.salesRepresentatorId   = null;
-          value.docRepresentatorId     = null;
-          value.authorizedById         = null;
-          value.createdBy              = "";
-          let result = await Vendors.create({...value});
-          Vendor_Associations.bulkCreate(createAccountList(accountCheck, result.dataValues.id))
-      });
-      await res.json({status:'success'});
-    }
-    catch (error) {
-      res.json({status:'error', result:error});
-    }
-});
-
-routes.post("/nonGlInBulk", async(req, res) => {
-
-  let obj = req.body;
-  try {
-    obj.forEach(async(x)=>{
-      let value = {...x};
-      value.accountRepresentatorId = null;
-      value.salesRepresentatorId   = null;
-      value.docRepresentatorId     = null;
-      value.authorizedById         = null;
-      value.createdBy              = "";
-      await Clients.create({...value});
-    });
-    await res.json({status:'success'});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/countAll", async(req, res) => {
-  try {
-    const clients = await Clients.count();
-    const vendors = await Vendors.count();
-    res.json({
-      status:'success',
-      result:{
-        clients,
-        vendors
-      }
-    });
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/deleteAll", async(req, res) => {
-  try {
-    // await Parent_Account.destroy({where:{}})
-    // await Child_Account.destroy({where:{}})
-    // await Clients.destroy({where:{}})
-    // await Vendors.destroy({where:{}})
-    // await Client_Associations.destroy({where:{}})
-    // await Vendor_Associations.destroy({where:{}})
-    await Invoice.destroy({where:{}})
-    res.json({status:'success'});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/deleteJobs", async(req, res) => {
-  try {
-    await SE_Job.destroy({where:{}})
-    await SE_Equipments.destroy({where:{}})
-    await Bl.destroy({where:{}})
-    await Container_Info.destroy({where:{}})
-    res.json({status:'success', result:result});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/deleteInvoices", async(req, res) => {
-  try {
-    const result = await Invoice.destroy({
-      where:{
-        companyId:'3',
-        currency:"USD"
-      }
-    })
-    res.json({status:'success', result:result});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/countInvoices", async(req, res) => {
-  try {
-    const result = await Invoice.count({
-      //where:{type:'Agent Bill'}
-    })
-    res.json({status:'success', result});
-  }
-  catch (error) {
-    res.json({status:'error', result:error});
-  }
-});
-
-routes.post("/testDeleteVouchers", async (req, res) => {
-  try {
-
-    await Vouchers.destroy({where:{}})
-    await Voucher_Heads.destroy({where:{}})
-    await Invoice.destroy({where:{}});
-    await Client_Associations.destroy({where:{}});
-    await Vendor_Associations.destroy({where:{}});
-    await Child_Account.destroy({where:{}});
-    await Parent_Account.destroy({where:{}});
-
-    await res.json({ status: "success"});
-  } catch (error) {
-    res.json({ status: "error", result: error });
-  }
-});
-
 routes.post("/createOpeningBalances", async(req, res) => {
 
   const setVoucherHeads = (id, heads) => {
@@ -998,6 +760,180 @@ routes.get("/getPartySetupAccounts", async(req, res) => {
       }]
     });
     res.json({status:'success', result:parentAccounts});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+
+
+
+//////////////////// ------------ Backup Routes ----------- /////////////////
+
+routes.post("/deleteAll", async(req, res) => {
+  try {
+    // await Parent_Account.destroy({where:{}})
+    // await Child_Account.destroy({where:{}})
+    // await Clients.destroy({where:{}})
+    // await Vendors.destroy({where:{}})
+    // await Client_Associations.destroy({where:{}})
+    // await Vendor_Associations.destroy({where:{}})
+    // await Invoice.destroy({where:{}})
+    res.json({status:'success'});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+routes.post("/deleteJobs", async(req, res) => {
+  try {
+    // await SE_Job.destroy({where:{}})
+    // await SE_Equipments.destroy({where:{}})
+    // await Bl.destroy({where:{}})
+    // await Container_Info.destroy({where:{}})
+    res.json({status:'success'});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+routes.post("/deleteInvoices", async(req, res) => {
+  try {
+    // const result = await Invoice.destroy({
+    //   where:{
+    //     companyId:'3',
+    //     currency:"USD"
+    //   }
+    // })
+    res.json({status:'success'});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+routes.post("/testDeleteVouchers", async (req, res) => {
+  try {
+
+    // await Vouchers.destroy({where:{}})
+    // await Voucher_Heads.destroy({where:{}})
+    // await Invoice.destroy({where:{}});
+    // await Client_Associations.destroy({where:{}});
+    // await Vendor_Associations.destroy({where:{}});
+    // await Child_Account.destroy({where:{}});
+    // await Parent_Account.destroy({where:{}});
+
+    await res.json({ status: "success"});
+  } catch (error) {
+    res.json({ status: "error", result: error });
+  }
+});
+routes.post("/countAll", async(req, res) => {
+  try {
+    const clients = await Clients.count();
+    const vendors = await Vendors.count();
+    res.json({
+      status:'success',
+      result:{
+        clients,
+        vendors
+      }
+    });
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+routes.post("/nonGlInBulk", async(req, res) => {
+
+  let obj = req.body;
+  try {
+    obj.forEach(async(x)=>{
+      let value = {...x};
+      value.accountRepresentatorId = null;
+      value.salesRepresentatorId   = null;
+      value.docRepresentatorId     = null;
+      value.authorizedById         = null;
+      value.createdBy              = "";
+      await Clients.create({...value});
+    });
+    await res.json({status:'success'});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+routes.post("/createVendorInBulk", async(req, res) => {
+
+  const createAccountList = (parent, id) => {
+    let result = [];
+    parent.forEach((x)=>{
+      x.dataValues.Child_Accounts.forEach((y)=>{
+        result.push({ParentAccountId:x.id, ChildAccountId:y.dataValues.id, CompanyId:x.CompanyId, VendorId:id})
+      })
+    })
+    return result;
+  }
+  let obj = req.body;
+  try {
+    obj.forEach(async(x)=>{    
+      let accountCheck = await Parent_Account.findAll({
+        where:{title:x.account.parent},
+        attributes:['id', 'title', 'CompanyId'],
+        include:[{
+          model:Child_Account,
+          where:{title:x.account.account_title},
+          attributes:['id', 'title'],
+        }]
+      })
+      let value = {...x};
+      value.accountRepresentatorId = null;
+      value.salesRepresentatorId   = null;
+      value.docRepresentatorId     = null;
+      value.authorizedById         = null;
+      value.createdBy              = "";
+      let result = await Vendors.create({...value});
+      Vendor_Associations.bulkCreate(createAccountList(accountCheck, result.dataValues.id))
+    });
+    await res.json({status:'success'});
+  }
+  catch (error) {
+    res.json({status:'error', result:error});
+  }
+});
+routes.post("/createClientInBulk", async(req, res) => {
+
+  const createAccountList = (parent, id) => {
+    let result = [];
+    parent.forEach((x)=>{
+      x.dataValues.Child_Accounts.forEach((y)=>{
+        result.push({ParentAccountId:x.id, ChildAccountId:y.dataValues.id, CompanyId:x.CompanyId, ClientId:id})
+      })
+    })
+    return result;
+  }
+
+  let obj = req.body;
+  try {
+    obj.forEach(async(x) => {
+      let accountCheck = await Parent_Account.findAll({
+        where:{title:x.account.parent},
+        attributes:['id', 'title', 'CompanyId'],
+        include:[{
+          model:Child_Account,
+          where:{title:x.account.account_title},
+          attributes:['id', 'title'],
+        }]
+      });
+      let value = {...x};
+      value.accountRepresentatorId = null;
+      value.salesRepresentatorId   = null;
+      value.docRepresentatorId     = null;
+      value.authorizedById         = null;
+      value.createdBy              = "";
+      let result = await Clients.create({...value});
+      Client_Associations.bulkCreate(createAccountList(accountCheck, result.dataValues.id));
+    })
+    await res.json({status:'success'});
   }
   catch (error) {
     res.json({status:'error', result:error});
