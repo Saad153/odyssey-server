@@ -816,11 +816,33 @@ routes.get("/jobBalancing", async (req, res) => {
     let includeObj = {
       model:SE_Job,
       include:[
-        { model:Bl, attributes:['hbl'] },
-        { model:SE_Equipments, attributes:['qty', 'size'] }
+        { model:Clients, attributes:['code','name'] },
+        { model:Bl, attributes:['hbl','mbl'] },
+        { model:SE_Equipments, attributes:['qty', 'size'] },
+        {
+          model: Clients,
+          as:'consignee', 
+          attributes:['name']
+        },
+        {
+          model: Employees,
+          as:'sales_representator', 
+          attributes:['name']
+        },
+        {
+          model: Vessel,
+          as:'vessel', 
+          attributes:['name']
+        },
+        {
+          model: Vendors,
+          as:'shipping_line', 
+          attributes:['name']
+        },
       ],
-      attributes:['id', 'fd', 'freightType', 'jobNo', 'operation'],
+      attributes:['id','weight','vol', 'fd', 'freightType', 'jobNo', 'operation','subType','jobDate','shipDate','arrivalDate'],
     }
+
     // overseas agent wise invoice/bill
     req.headers.overseasagent?includeObj.where = {overseasAgentId:req.headers.overseasagent}:null;
     const result = await Invoice.findAll({
