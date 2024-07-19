@@ -611,8 +611,9 @@ routes.post("/saveChargeHeades", async(req, res) => {
 // This api saves the heads added on the related Job
 routes.post("/saveHeadesNew", async(req, res) => {
   try {
-    await Charge_Head.destroy({where:{id:req.body.deleteList}});
-    await SE_Job.update({exRate:req.body.exRate}, {where:{id:req.body.id}});
+    req?.body?.deleteList != undefined? await Charge_Head.destroy({where:{id:req.body.deleteList}}) : null;
+    req?.body?.id != undefined? await SE_Job.update({exRate:req.body.exRate}, {where:{id:req.body.id}}) : null;
+
     let data;
     await req.body.charges.forEach(async(x) => {
       data = await Charge_Head.upsert(x);
@@ -620,6 +621,7 @@ routes.post("/saveHeadesNew", async(req, res) => {
     res.json({status:'success'});
   }
   catch (error) {
+    console.log(error)
     res.json({status:'error', result:error});
   }
 });
