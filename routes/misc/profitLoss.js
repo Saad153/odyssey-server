@@ -1,7 +1,7 @@
 const { Child_Account, Parent_Account } = require("../../functions/Associations/accountAssociations");
 const { Invoice, Invoice_Losses, Invoice_Transactions } = require("../../functions/Associations/incoiceAssociations");
 const { Vouchers, Voucher_Heads }=require("../../functions/Associations/voucherAssociations");
-const { SE_Job } = require("../../functions/Associations/jobAssociations/seaExport");
+const { SE_Job, SE_Equipments, Commodity } = require("../../functions/Associations/jobAssociations/seaExport");
 const { Vendors } = require("../../functions/Associations/vendorAssociations");
 const { Clients }=require("../../functions/Associations/clientAssociation");
 const { Bl } = require('../../functions/Associations/jobAssociations/seaExport');
@@ -10,6 +10,7 @@ const { Accounts } = require('../../models/');
 const routes=require('express').Router();
 const Sequelize=require('sequelize');
 const moment = require("moment");
+const { Employees } = require("../../functions/Associations/employeeAssociations");
 const url = 'profitLoss';
 const Op = Sequelize.Op;
 
@@ -35,7 +36,7 @@ routes.get(`/${url}/job`, async(req, res) => {
     req.headers.overseasagent?obj.overseasAgentId=req.headers.overseasagent:null;
     req.headers.jobtype?obj.operation=req.headers.jobtype.split(","):null;
     const result = await SE_Job.findAll({
-      attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight','subType'],
+      attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight','subType','companyId','pcs'],
       where:obj,
       include:[
         {
@@ -48,12 +49,20 @@ routes.get(`/${url}/job`, async(req, res) => {
             model:Invoice_Transactions
           }]
         },
-        { model:Bl, attributes:['hbl']
+        { model:Bl, attributes:['hbl','mbl']
 
         },
         { model:Clients, attributes:['name'] },
         { model:Clients, as:'shipper', attributes:['name'] },
+        { model:Clients, as:'consignee', attributes:['name'] },
         { model:Vendors, as:'local_vendor', attributes:['name'] },
+        { model:Vendors, as:'overseas_agent', attributes:['name'] },
+        { model:Vendors, as:'shipping_line', attributes:['name'] },
+        
+        { model:SE_Equipments,  attributes:['teu'] },
+        { model:Commodity, as:'commodity',  attributes:['name'] },
+        
+        { model:Employees, as:'sales_representator', attributes:['name'] },
       ]
     });
 
