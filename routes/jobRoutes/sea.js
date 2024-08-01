@@ -412,8 +412,8 @@ routes.post("/createBl", async(req, res) => {
     delete data.id;
 
     const check = await Bl.findOne({
-      where:{ [Op.or]: [{mbl: data.mbl}, {hbl: data.hbl}]},
-      attributes:["mbl", "hbl"] 
+      where: {hbl: data.hbl},
+      attributes:["hbl"] 
     });
     if(check?.dataValues==null){
       let obj = {
