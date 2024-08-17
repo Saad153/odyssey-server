@@ -415,7 +415,7 @@ routes.post("/createBl", async(req, res) => {
       attributes:["mbl", "hbl"] 
 
     });
-    if(check?.dataValues==null){
+    if(check?.dataValues.mbl =="" && check?.dataValues.hbl ==""){
       let obj = {
         pkgUnit:data.unit, 
         pcs:data.pkgs, 
