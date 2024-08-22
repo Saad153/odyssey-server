@@ -13,6 +13,9 @@ module.exports = (sequelize, DataTypes) => {
         subCategory:{
             type:DataTypes.STRING,
         },
+        code:{
+            type:DataTypes.STRING,
+        }
     })
     return Child_Account;
 }

@@ -13,6 +13,9 @@ module.exports = (sequelize, DataTypes) => {
             validate:{
                 notEmpty: true
             }
+        },
+        code:{
+            type:DataTypes.STRING,
         }
     })
     return Parent_Account;

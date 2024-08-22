@@ -27,10 +27,10 @@ async function getAllAccounts(id){
     include:[{
       model:Parent_Account,
       where:{CompanyId:id},
-      attributes:['id', 'title', 'editable', 'AccountId', 'CompanyId'],
+      attributes:['id', 'title', 'editable', 'AccountId', 'CompanyId', 'code'],
       include:[{
         model:Child_Account,
-        attributes:['id', 'title', 'ParentAccountId', 'createdAt', 'editable'],
+        attributes:['id', 'title', 'ParentAccountId', 'createdAt', 'editable', 'code'],
         order: [['id', 'DESC']],
       }]
     }]
@@ -120,6 +120,47 @@ routes.post("/editChildAccount", async(req, res) => {
       res.json({status:'exists', result:result});
     }else{
       await Child_Account.update({title:title},{where:{id:id}})
+      let val;
+      val = await getAllAccounts(CompanyId);
+      res.json({status:'success', result:val});
+    }
+  }
+  catch (error) {
+    res.send({status:'error', result:error});
+  }
+});
+
+routes.post("/codeParentAccount", async(req, res) => {
+
+  const {id, title, AccountId, CompanyId, code} = req.body
+  try {
+    result = false
+    if(result){
+      console.log("Got result"+code)
+      res.json({status:'exists', result:result});
+    }else{
+      console.log("Updating")
+      await Parent_Account.update({title:title, code:code},{where:{id:id}})
+      let val;
+      val = await getAllAccounts(CompanyId);
+      res.json({status:'success', result:val});
+    }
+  }
+  catch (error) {
+    console.log("Error")
+    res.send({status:'error', result:error});
+  }
+});
+
+routes.post("/codeChildAccount", async(req, res) => {
+
+  const {id, title, ParentAccountId, CompanyId, code} = req.body
+  try {
+    let result = false
+    if(result){
+      res.json({status:'exists', result:result});
+    }else{
+      await Child_Account.update({title:title, code:code},{where:{id:id}})
       let val;
       val = await getAllAccounts(CompanyId);
       res.json({status:'success', result:val});
