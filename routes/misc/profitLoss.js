@@ -23,8 +23,9 @@ routes.get(`/${url}/job`, async(req, res) => {
         if (req.headers.company === '4') {
           obj.companyId = { [Op.in]: ['1', '3'] };
         } else {
+          
           obj.companyId = req.headers.company;
-          obj.subType = req.headers.subtype;
+          obj.subType = { [Op.in]:req.headers.subtype.split(",")};
         }
 
        obj.createdAt= {
@@ -35,10 +36,10 @@ routes.get(`/${url}/job`, async(req, res) => {
     req.headers.client?obj.ClientId=req.headers.client:null;
     req.headers.overseasagent?obj.overseasAgentId=req.headers.overseasagent:null;
     req.headers.jobtype?obj.operation=req.headers.jobtype.split(","):null;
-    // console.log(obj)
+    console.log("obj",obj)
     const result = await SE_Job.findAll({
       attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight',
-        'subType','companyId','pcs','pol','exRate','jobType','costCenter','nomination',
+        'subType','companyId','pcs','pol','exRate','costCenter','nomination',
         'pkgUnit','customerRef','eta','shipDate'],
       where:obj,
       include:[
