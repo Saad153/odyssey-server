@@ -36,7 +36,6 @@ routes.get(`/${url}/job`, async(req, res) => {
     req.headers.client?obj.ClientId=req.headers.client:null;
     req.headers.overseasagent?obj.overseasAgentId=req.headers.overseasagent:null;
     req.headers.jobtype?obj.operation=req.headers.jobtype.split(","):null;
-    console.log("obj",obj)
     const result = await SE_Job.findAll({
       attributes:['id','jobNo','fd', 'createdAt', 'jobType', 'operation', 'weight',
         'subType','companyId','pcs','pol','exRate','costCenter','nomination',
@@ -46,9 +45,9 @@ routes.get(`/${url}/job`, async(req, res) => {
         {
           model:Invoice,
           attributes:['id', 'total', 'payType', 'recieved' , 'paid', 'type', 'status', 'ex_rate'],
-          // where: {
-          //   approved:'1',
-          // },
+          where: {
+            approved:'1',
+          },
           include:[{
             model:Invoice_Transactions
           }]
@@ -69,7 +68,6 @@ routes.get(`/${url}/job`, async(req, res) => {
         { model:Employees, as:'sales_representator', attributes:['name'] },
       ]
     });
-    console.log(result.length)
     res.json({status:'success', result:result});
 
   }

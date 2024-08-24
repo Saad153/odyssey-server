@@ -16,8 +16,7 @@ routes.post(`/${url}/getBySearch`, async(req, res) => {
     let result;
     if(req.body.type=="client"){
       result = await Clients.findAll({
-        attributes:['id', 'name'],
-        //attributes: ['id',fn('CONCAT', col('name'), ' ', col('code'))],
+        attributes:['id', 'name','code'],
         where:{
           [Op.or]: [
             { code: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('code')), 'LIKE', '%' + req.body.search.toLowerCase() + '%') },
@@ -27,7 +26,7 @@ routes.post(`/${url}/getBySearch`, async(req, res) => {
       })
     } else if (req.body.type=="vendor"){
       result = await Vendors.findAll({
-        attributes:['id', 'name'],
+        attributes:['id', 'name','code'],
         where:{
           [Op.or]: [
             { code: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('code')), 'LIKE', '%' + req.body.search.toLowerCase() + '%') },
@@ -38,7 +37,7 @@ routes.post(`/${url}/getBySearch`, async(req, res) => {
       })
     } else if(req.body.type=="agent"){
       result = await Vendors.findAll({
-        attributes:['id', 'name'],
+        attributes:['id', 'name','code'],
         where:{
           [Op.or]: [
             { code: Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('code')), 'LIKE', '%' + req.body.search.toLowerCase() + '%') },
