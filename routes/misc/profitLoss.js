@@ -203,7 +203,6 @@ routes.get(`/${url}/search`, async(req, res) => {
 });
 
 routes.get(`/${url}/incomeStatement`, async(req, res) => {
-  console.log("over Here")
   try {
     const result = await Accounts.findAll({
       where:{

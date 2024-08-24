@@ -444,7 +444,7 @@ routes.post("/deletePaymentReceipt", async(req, res) => {
     await Invoice_Transactions.destroy({where:{VoucherId:req.body.id}})
     await Vouchers.destroy({where:{id:req.body.id}})
 
-    res.json({status:'success', result});
+    res.json({status:'success',});
   }
   catch (error) {
     res.json({status:'error', result:error});
