@@ -50,10 +50,27 @@ routes.post("/createParentAccount", async(req, res) => {
       }
     })
     if(result){
-       res.json({status:'exists'});
+      console.log("result found")
+      console.log("54"+result)
+      res.json({status:'exists', result:result});
     }else{
+      const code = req.body.CompanyId.toString()+req.body.AccountId.toString();
+      console.log(code)
+      const result1 = await Parent_Account.findOne({
+        where: {
+          code: {
+            [Op.like]: `${code}%`
+          }
+        },
+        order: [['code', 'DESC']],
+      });
+      
+      
+      console.log(result1.dataValues.code)
+      let newCode = parseInt(result1.dataValues.code)+1
       let values = req.body
       values.editable=1
+      values.code=newCode.toString()
       await Parent_Account.create(values);
       let val;
       val = await getAllAccounts(req.body.CompanyId);
@@ -61,6 +78,7 @@ routes.post("/createParentAccount", async(req, res) => {
     }
   }
   catch (error) {
+    console.log(error)
     res.json({status:'error', result:error});
   }
 });
@@ -78,8 +96,27 @@ routes.post("/createChildAccount", async(req, res) => {
     if(result){
        res.json({status:'exists'});
     }else{
+      const result1 = await Parent_Account.findOne({
+        where: {
+          id: req.body.ParentAccountId
+        },
+      });
+      const code = result1.dataValues.code
+      const result2 = await Child_Account.findOne({
+        where: {
+          code: {
+            [Op.gte]: parseInt(code)* 10000,  
+            [Op.lt]: (parseInt(code)+1) * 10000  
+          }
+        },
+        order: [['code', 'DESC']],
+      });
+      
+      newCode=(parseInt(result2.dataValues.code)+1).toString()
+
       let values = req.body
       values.editable=1
+      values.code=newCode
       await Child_Account.create(values);
       let val;
       val = await getAllAccounts(req.body.CompanyId);
@@ -87,6 +124,7 @@ routes.post("/createChildAccount", async(req, res) => {
     }
   }
   catch (error) {
+    console.log(error)
     res.json({status:'error', result:error});
   }
 });
@@ -351,6 +389,25 @@ routes.get("/getAllParents", async(req, res) => {
   }
 });
 
+routes.get("/getAllParentswithChildsbyAccountId", async(req, res) => {
+  try{
+    console.log("Running")
+    const result = await Parent_Account.findAll({
+      attributes:["title", "id", "code", "AccountId"],
+      where:{CompanyId:req.headers.companyid},
+      include:[{
+        model:Child_Account,
+        attributes:["title", "id", "code"],
+      }]
+    })
+    // console.log(result)
+    res.json({status: 'success', result: result})
+  }
+  catch (error) {
+
+  }
+});
+
 routes.get("/getSEJobChilds", async(req, res) => {
   try {
 
@@ -595,23 +652,46 @@ routes.get("/balanceSheet", async(req, res) => {
 
 routes.get("/voucherLedger", async(req, res) => {
   try {
-    const result = await Child_Account.findAll({
-      where:{ParentAccountId:req.headers.id},
-      attributes:['title'],
-      include:[
-        { 
-          model:Voucher_Heads,
-          attributes:['amount', 'createdAt'],
-          include:[{
-            model:Vouchers,
-            attributes:['voucher_Id', 'vType'],
-          }]
+    const result = await Voucher_Heads.findAll({
+      // raw: true,
+      attributes:["amount", "type", "createdAt", "defaultAmount", "narration"],
+      where:{
+        ChildAccountId:req.headers.id,
+        createdAt:{
+          [Op.gte]: moment(req.headers.from).toDate(),
+          [Op.lte]: moment(req.headers.to).add(1, 'days').toDate(),
         }
-      ]
+      },
+      include:{
+        model:Vouchers,
+        where:{
+          currency:req.headers.currency
+        },
+        attributes:["id", "currency", "vType", "type", "exRate"],
+      }
     })
+    console.log("Result Done")
+    // console.log(result)
+
+    // const result = await Child_Account.findAll({
+    //   where:{ParentAccountId:req.headers.id},
+    //   attributes:['title'],
+    //   include:[
+    //     { 
+    //       model:Voucher_Heads,
+    //       attributes:['amount', 'createdAt'],
+    //       include:[{
+    //         model:Vouchers,
+    //         attributes:['voucher_Id', 'vType'],
+    //       }]
+    //     }
+    //   ]
+    // })
     res.json({status:'success', result:result});
   }
   catch (error) {
+    console.log("Error")
+    console.log(error)
     res.json({status:'error', result:error});
   }
 });   
