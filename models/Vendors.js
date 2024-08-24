@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         createdBy:{ type:DataTypes.STRING },
         active:{
           type:DataTypes.BOOLEAN,
-          defaultValue:0.0
+          // defaultValue:0.0
         },
     })
     return Vendors;

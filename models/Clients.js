@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     nongl:{ type:DataTypes.STRING },
     active:{
       type:DataTypes.BOOLEAN,
-      defaultValue:0.0
+      // defaultValue:0.0
     },
   })
   return Clients;

@@ -10,13 +10,9 @@ const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
 let sequelize;
-// if (config.use_env_variable) {
-//   sequelize = new Sequelize(process.env[config.use_env_variable], config);
-// } else {
-//   sequelize = new Sequelize(config.database, config.username, config.password, config);
-// }
-//const connectionString = "postgresql://syed:BUHl5AOVYF_vNlqIBbJi2A@wet-boxer-2146.7s5.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full"
-const connectionString = "postgresql://abdullah:ckn3lCxxtBsWY-65nwfJGA@expert-flapper-2045.7s5.cockroachlabs.cloud:26257/tech_dc_test?sslmode=verify-full"
+// const connectionString = "postgresql://abdullah:ckn3lCxxtBsWY-65nwfJGA@expert-flapper-2045.7s5.cockroachlabs.cloud:26257/tech_dc_test?sslmode=verify-full"
+
+const connectionString = "postgresql://farrukh:EP4tXoS3TKprPIYG825bjA@boreal-coder-5746.7s5.aws-ap-south-1.cockroachlabs.cloud:26257/dev-server?sslmode=verify-full"
 sequelize = new Sequelize(connectionString, {
   dialectOptions: {
     application_name: "docs_simplecrud_node-sequelize"
@@ -36,6 +32,16 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db)
   }
 });
+
+// Sync models with the database to create tables
+sequelize.sync({ alter: true })  // alter: true will adjust the schema to match the models, without dropping tables
+  .then(() => {
+    console.log("Database & tables created!");
+  })
+  .catch((err) => {
+    console.error("Error syncing database: ", err);
+  });
+  
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
